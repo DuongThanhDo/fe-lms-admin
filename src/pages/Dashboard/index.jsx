@@ -1,115 +1,108 @@
-import React, { useEffect } from "react";
-import { Layout, Card, Table, List } from "antd";
-import { Line, Bar } from "react-chartjs-2";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useEffect, useState } from "react";
+import { Layout, Card, Table, List, message } from "antd";
+import { Line } from "react-chartjs-2";
 import {
   UserOutlined,
   BookOutlined,
-  CalendarOutlined,
+  FileSearchOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
 import { Chart, registerables } from "chart.js";
-import { useNavigate } from "react-router-dom";
 import { configs } from "../../configs";
-import { useSelector } from "react-redux";
+import axios from "axios";
 
 Chart.register(...registerables);
-
 const { Content } = Layout;
 
-const statsData = [
-  { icon: <UserOutlined />, label: "Students", value: "150" },
-  { icon: <BookOutlined />, label: "Courses", value: "8" },
-  { icon: <CalendarOutlined />, label: "Classes This Month", value: "22" },
-  { icon: <FileTextOutlined />, label: "Assignments Graded", value: "56" },
-];
-
-const lineChartData = {
-  labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-  datasets: [
-    { label: "Students", data: [50, 70, 80, 100, 90, 110], borderColor: "#1890ff", fill: false },
-  ],
-};
-
-const barChartData = {
-  labels: ["Math", "English", "Science", "History", "IT"],
-  datasets: [
-    { label: "Progress", data: [75, 85, 90, 80, 95], backgroundColor: "#52c41a" },
-  ],
-};
-
-const classColumns = [
-  { title: "Course", dataIndex: "course", key: "course" },
-  { title: "Students", dataIndex: "students", key: "students" },
-  { title: "Progress", dataIndex: "progress", key: "progress" },
-];
-
-const classData = [
-  { key: "1", course: "Mathematics", students: 30, progress: "80%" },
-  { key: "2", course: "English", students: 25, progress: "75%" },
-  { key: "3", course: "Science", students: 20, progress: "90%" },
-];
-
-const schedule = [
-  { title: "Math Class - 10:00 AM", date: "March 28, 2025" },
-  { title: "English Class - 2:00 PM", date: "March 28, 2025" },
-  { title: "Science Lab - 4:00 PM", date: "March 29, 2025" },
-];
-
 const Dashboard = () => {
-  const authState = useSelector((state) => state.auth);
-  const login = authState.isLoggedIn;
-  const navigate = useNavigate();
+  const [overview, setOverview] = useState({
+    totalStudents: 0,
+    totalTeachers: 0,
+    totalCoursesPublished: 0,
+    totalCoursesPending: 0,
+  });
 
+  const [monthlyRevenue, setMonthlyRevenue] = useState([]);
+  const fetchData = async () => {
+    try {
+      const [overviewRes, revenueRes] = await Promise.all([
+        axios.get(`${configs.API_BASE_URL}/statistics/overview`),
+        axios.get(`${configs.API_BASE_URL}/statistics/revenue-by-month`),
+      ]);
+
+      setOverview(overviewRes.data);
+      setMonthlyRevenue(revenueRes.data);
+    } catch (error) {
+      message.error("Failed to load dashboard statistics.");
+      console.error(error);
+    }
+  };
   useEffect(() => {
-    if(!login) navigate(configs.routes.login);
-  }, [])
+    fetchData();
+  }, []);
+
+  const statsData = [
+    {
+      icon: <UserOutlined />,
+      label: "Học viên",
+      value: overview.totalStudents,
+    },
+    {
+      icon: <FileTextOutlined />,
+      label: "Giảng viên",
+      value: overview.totalTeachers,
+    },
+    {
+      icon: <BookOutlined />,
+      label: "Khóa học xuất bản",
+      value: overview.totalCoursesPublished,
+    },
+    {
+      icon: <FileSearchOutlined />,
+      label: "Khóa học chờ duyệt",
+      value: overview.totalCoursesPending,
+    },
+  ];
+
+  const lineChartData = {
+    labels: Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`),
+    datasets: [
+      {
+        label: "Doanh thu (VND)",
+        data: monthlyRevenue.map((m) => m.revenue),
+        borderColor: "#1890ff",
+        backgroundColor: "rgba(24, 144, 255, 0.1)",
+        fill: true,
+        tension: 0.4,
+      },
+    ],
+  };
 
   return (
     <Layout>
       <Content className="container mt-4">
-        {/* Statistics */}
+        {/* Thống kê tổng quan */}
         <div className="row mb-4">
           {statsData.map((stat, index) => (
             <div key={index} className="col-md-3">
               <Card>
-                <h4>{stat.icon} {stat.value}</h4>
+                <h4>
+                  {stat.icon} {stat.value}
+                </h4>
                 <p>{stat.label}</p>
               </Card>
             </div>
           ))}
         </div>
 
-        {/* Charts */}
+        {/* Biểu đồ doanh thu */}
         <div className="row mb-4">
-          <div className="col-md-6">
-            <Card title="Student Growth">
+          <div className="col-md-12">
+            <Card title="Thống kê doanh thu theo tháng">
               <Line data={lineChartData} options={{ responsive: true }} />
             </Card>
           </div>
-          <div className="col-md-6">
-            <Card title="Class Progress">
-              <Bar data={barChartData} options={{ responsive: true }} />
-            </Card>
-          </div>
         </div>
-
-        {/* Class Management */}
-        <Card title="My Classes" className="mb-4">
-          <Table columns={classColumns} dataSource={classData} pagination={false} />
-        </Card>
-
-        {/* Schedule */}
-        <Card title="Upcoming Classes">
-          <List
-            dataSource={schedule}
-            renderItem={(item) => (
-              <List.Item>
-                <List.Item.Meta title={item.title} description={item.date} />
-              </List.Item>
-            )}
-          />
-        </Card>
       </Content>
     </Layout>
   );

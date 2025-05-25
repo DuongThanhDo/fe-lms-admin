@@ -25,14 +25,24 @@ const FormsBuilder = () => {
         plugins: [grapesjsBlocksBasic, grapesjsPresetWebpage],
       });
 
-      editorInstance.BlockManager.add("Nhập nội dung", {
-        label: "Input",
+      editorInstance.BlockManager.add("input-text-1", {
+        label: "Tên học viên",
         category: "Forms",
         attributes: {
           class: "fa fa-square",
-          title: "Input",
+          title: "Tên học viên",
         },
-        content: '<input type="text" placeholder="Input">',
+        content: "<span>Tên học viên</span>",
+      });
+
+      editorInstance.BlockManager.add("course-name", {
+        label: "Tên khóa học",
+        category: "Forms",
+        attributes: {
+          class: "fa fa-square",
+          title: "Tên khóa học",
+        },
+        content: "<span>Tên khóa học</span>",
       });
 
       editorInstance.on("component:update", () => {
@@ -117,6 +127,7 @@ const FormsBuilder = () => {
           alignItems: "center",
           padding: "10px 40px",
           justifyContent: "space-between",
+          backgroundColor: "#f5f5f5",
         }}
       >
         <Input
@@ -125,8 +136,12 @@ const FormsBuilder = () => {
           placeholder="Nhập tên chứng chỉ"
           style={{ width: 300, marginRight: 10 }}
         />
-        <Button type="primary" onClick={handleSave}>
-          Lưu
+        <Button
+          type="primary"
+          onClick={handleSave}
+          style={{ backgroundColor: "#1B8381", borderColor: "#1B8381" }}
+        >
+          Lưu chứng chỉ
         </Button>
       </div>
       <div id="gjs"></div>
