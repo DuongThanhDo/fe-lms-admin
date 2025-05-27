@@ -1,10 +1,11 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
 import DefaultLayout from "./layouts/DefaultLayout";
-import { Fragment, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { Fragment, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { fetchCategories } from "./store/slices/categorySlice";
 import { AllRoutes } from "./routes/AllRoutes";
+import PrivateRoute, { protectedRoutes } from "./routes/PrivateRoute";
 
 function App() {
   const dispatch = useDispatch();
@@ -27,14 +28,24 @@ function App() {
               Layout = Fragment;
             }
 
+            const isProtected = protectedRoutes.includes(route.path);
+
             return (
               <Route
                 key={index}
                 path={route.path}
                 element={
-                  <Layout>
-                    <Page />
-                  </Layout>
+                  isProtected ? (
+                    <PrivateRoute>
+                      <Layout>
+                        <Page />
+                      </Layout>
+                    </PrivateRoute>
+                  ) : (
+                    <Layout>
+                      <Page />
+                    </Layout>
+                  )
                 }
               />
             );

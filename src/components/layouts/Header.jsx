@@ -19,7 +19,7 @@ const Header = () => {
         <Navbar.Brand href="/">
           <img src={assets.images.logo} alt="Logo" width="50" />
 
-          <span style={{color: "#1D8381", marginLeft: 12 }}><strong>Eduhub</strong></span>
+          <span style={{color: "#1D8381", marginLeft: 12 }}><strong>Quản trị viên</strong></span>
         </Navbar.Brand>
         <div className="d-flex align-items-center gap-3">
           {isLoggedIn ? (

@@ -169,7 +169,7 @@ const CourseList = ({ courses, fetchCourses }) => {
       dataIndex: "price",
       key: "price",
       render: (price) =>
-        price !== null && price !== undefined && price !== 0
+        price !== null && price !== undefined && price != 0 && price != "0.00"
           ? `${price.toLocaleString()} VND`
           : "Miễn phí",
     },

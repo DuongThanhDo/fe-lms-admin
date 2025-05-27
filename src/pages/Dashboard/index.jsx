@@ -19,7 +19,7 @@ const Dashboard = () => {
     totalStudents: 0,
     totalTeachers: 0,
     totalCoursesPublished: 0,
-    totalCoursesPending: 0,
+    totalCoursesPending: 0, 
   });
 
   const [monthlyRevenue, setMonthlyRevenue] = useState([]);
@@ -81,7 +81,6 @@ const Dashboard = () => {
   return (
     <Layout>
       <Content className="container mt-4">
-        {/* Thống kê tổng quan */}
         <div className="row mb-4">
           {statsData.map((stat, index) => (
             <div key={index} className="col-md-3">
@@ -95,7 +94,6 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Biểu đồ doanh thu */}
         <div className="row mb-4">
           <div className="col-md-12">
             <Card title="Thống kê doanh thu theo tháng">
