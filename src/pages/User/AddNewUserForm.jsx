@@ -12,6 +12,24 @@ const AddNewUserForm = () => {
     try {
       await axios.post(`${configs.API_BASE_URL}/users/registerByAdmin`, values);
       message.success("Thêm người dùng thành công!");
+
+      await axios.post(`${configs.API_BASE_URL}/mailer/send`, {
+        to: values.email,
+        subject: "Thông tin tài khoản của bạn",
+        html: `
+          <p>Chào bạn <b>${values.name}</b>,</p>
+          <p>Tài khoản của bạn đã được tạo với thông tin:</p>
+          <ul>
+            <li>Email: ${values.email}</li>
+            <li>Mật khẩu: ${values.password}</li>
+            <li>Vai trò: ${values.role === "teacher" ? "Giáo viên" : "Học viên"}</li>
+          </ul>
+          <p>Vui lòng đăng nhập và thay đổi mật khẩu để bảo mật tài khoản.</p>
+          <p>Trân trọng,</p>
+          <p>Đội ngũ hỗ trợ</p>
+        `,
+      });
+      
       form.resetFields();
     } catch (error) {
       const errMsg = error.response?.data?.message || "Đã có lỗi xảy ra!";
@@ -29,7 +47,7 @@ const AddNewUserForm = () => {
         >
           <Input placeholder="Nhập họ tên" />
         </Form.Item>
-  
+
         <Form.Item
           label="Email"
           name="email"
@@ -40,7 +58,7 @@ const AddNewUserForm = () => {
         >
           <Input placeholder="Nhập email" />
         </Form.Item>
-  
+
         <Form.Item
           label="Số điện thoại"
           name="phone"
@@ -48,7 +66,7 @@ const AddNewUserForm = () => {
         >
           <Input placeholder="Nhập số điện thoại" />
         </Form.Item>
-        
+
         <Form.Item
           label="Mật khẩu"
           name="password"
@@ -59,7 +77,7 @@ const AddNewUserForm = () => {
         >
           <Input.Password placeholder="Nhập mật khẩu" />
         </Form.Item>
-  
+
         <Form.Item
           label="Vai trò"
           name="role"
@@ -70,7 +88,7 @@ const AddNewUserForm = () => {
             <Option value="student">Học viên</Option>
           </Select>
         </Form.Item>
-  
+
         <Form.Item>
           <Button type="primary" htmlType="submit" block>
             Thêm người dùng

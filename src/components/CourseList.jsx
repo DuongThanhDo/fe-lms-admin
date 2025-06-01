@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   Tag,
@@ -8,6 +8,7 @@ import {
   message,
   Modal,
   Card,
+  Input,
 } from "antd";
 import {
   CheckCircleOutlined,
@@ -41,6 +42,7 @@ const statusLabels = {
 
 const CourseList = ({ courses, fetchCourses }) => {
   const navigate = useNavigate();
+  const [rejectionReason, setRejectionReason] = useState("");
 
   const handleDeleteCourse = async (courseId) => {
     try {
@@ -79,39 +81,60 @@ const CourseList = ({ courses, fetchCourses }) => {
     }
   };
 
-  const handleAction = async (key, record) => {
-    const actions = {
-      published: {
-        action: "duyệt",
-        okText: "Duyệt",
-        icon: <CheckCircleOutlined style={{ color: "green" }} />,
-      },
-      rejected: {
-        action: "từ chối",
-        okText: "Từ chối",
-        icon: <CloseCircleOutlined style={{ color: "red" }} />,
-      },
-    };
-  
-    const selectedAction = actions[key];
-    if (!selectedAction) return;
-  
-    const { action, okText, icon } = selectedAction;
-    const title = `Xác nhận ${action} khóa học`;
-    const content = `Bạn có chắc chắn muốn ${action} khóa học này không?`;
-  
+const handleAction = async (key, record) => {
+  if (key === "rejected") {
+    let reason = "";
     Modal.confirm({
-      title,
-      icon,
-      content,
-      centered: true,
-      okText,
+      title: "Từ chối khóa học",
+      content: (
+        <div>
+          <p>Vui lòng nhập lý do từ chối khóa học:</p>
+          <Input.TextArea
+            rows={4}
+            onChange={(e) => {
+              reason = e.target.value;
+            }}
+            placeholder="Nhập lý do từ chối..."
+          />
+        </div>
+      ),
+      okText: "Từ chối",
+      cancelText: "Hủy",
+      onOk: async () => {
+        if (!reason.trim()) {
+          message.error("Vui lòng nhập lý do từ chối");
+          throw new Error();
+        }
+        try {
+          await axios.patch(`${configs.API_BASE_URL}/courses/${record.id}/reject`, {
+            status: CourseStatus.REJECTED,
+            reason: reason,
+          });
+          message.success("Từ chối khóa học thành công");
+        } catch (error) {
+          message.error("Lỗi khi từ chối khóa học");
+        } finally {
+          fetchCourses();
+        }
+      },
+    });
+    return;
+  }
+
+  if (key === "published") {
+    Modal.confirm({
+      title: "Duyệt khóa học",
+      icon: <CheckCircleOutlined style={{ color: "green" }} />,
+      content: "Bạn có chắc chắn muốn duyệt khóa học này không?",
+      okText: "Duyệt",
       cancelText: "Hủy",
       onOk() {
         handleActionConfirm(key, record);
       },
     });
-  };
+  }
+};
+
 
   const columns = [
     {
